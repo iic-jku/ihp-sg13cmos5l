@@ -65,3 +65,13 @@ layers:
 
 devices:
 - [x] sealring_complete - removed forbidden layers, added TopVia1(125) for M4-TM1 connection
+
+### DRC Verification (2026-01-19)
+
+**topVia1**: PASS (density violations expected for small test cell)
+
+**sealring_complete**: PASS (after PCell fix)
+- Issue: Original sealring designed for TopVia2 which allows large vias
+- TopVia1 requires exactly 0.42um x 0.42um via size
+- Fix: Modified sealring_code.py to generate TopVia1 arrays instead of solid fills
+- QA cell updated with regenerated sealring from fixed PCell
