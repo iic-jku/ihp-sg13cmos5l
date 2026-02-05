@@ -16,7 +16,7 @@
 # limitations under the License.
 #=========================================================================================
 #
-# Modified for IHP-SG13CMOS5L CMOS5L
+# Modified for IHP-SG13CMOS5L
 # Metal stack: M1 -> Via1 -> M2 -> Via2 -> M3 -> Via3 -> M4 -> TopVia1 -> TopMetal1
 # - TopMetal1 (layer 126) is the top routing layer
 # - Removed Metal5 (layer 67), Via4 (layer 66), TopMetal2 (layer 134), TopVia2 (layer 133)
@@ -266,10 +266,58 @@ drc_rules = get_drc_values(logger)
 
 # === LAYOUT EXTENT ===
 CHIP = extent.sized(0.0)
-chip_area = CHIP.area
-logger.info("Total area of the design is #{chip_area} um^2.")
-tiles_boundary = tile_boundary(CHIP)
 chip_bbox = CHIP.bbox
+
+# Use prBoundary for chip area when available (3-tier fallback).
+# extent.sized(0.0) returns the bounding box of ALL shapes in the layout,
+# which can be much larger than the actual design area when shapes exist
+# outside the design boundary (labels, alignment marks, etc.).
+#
+# Fallback order:
+#   1. prBoundary (189/0) - official boundary layer per layer map
+#   2. EdgeSeal.boundary (39/4) - common workaround when 189/0 not drawn
+#   3. Layout extent - last resort
+prboundary_189 = get_polygons(189, 0)
+prboundary_189_count = prboundary_189.count
+logger.info("prBoundary (189/0) has #{prboundary_189_count} polygons")
+
+edgeseal_boundary = get_polygons(39, 4)
+edgeseal_boundary_count = edgeseal_boundary.count
+logger.info("EdgeSeal.boundary (39/4) has #{edgeseal_boundary_count} polygons")
+
+if prboundary_189_count > 0
+  chip_area = prboundary_189.area
+  chip_boundary_bbox = prboundary_189.bbox
+  chip_boundary_region = prboundary_189
+  logger.info("Using prBoundary (189/0) for chip area: #{chip_area} um^2.")
+  edgeseal_boundary.forget
+elsif edgeseal_boundary_count > 0
+  chip_area = edgeseal_boundary.area
+  chip_boundary_bbox = edgeseal_boundary.bbox
+  chip_boundary_region = edgeseal_boundary
+  logger.info("Using EdgeSeal.boundary (39/4) for chip area: #{chip_area} um^2.")
+  prboundary_189.forget
+else
+  chip_area = CHIP.area
+  chip_boundary_bbox = chip_bbox
+  chip_boundary_region = CHIP
+  logger.info("No boundary layer found. Using layout extent for chip area: #{chip_area} um^2.")
+  prboundary_189.forget
+  edgeseal_boundary.forget
+end
+
+extent_area = CHIP.area
+if chip_area < extent_area * 0.99
+  logger.warn("Layout extent (#{extent_area} um^2) > chip boundary (#{chip_area} um^2). Shapes exist outside boundary.")
+end
+
+# Calculate chip dimensions for windowed density checks
+# Note: bbox returns DBox in micrometers, not database units
+chip_width = chip_boundary_bbox.width
+chip_height = chip_boundary_bbox.height
+logger.info("Chip dimensions: #{chip_width.round(1)} x #{chip_height.round(1)} um")
+
+tiles_boundary = tile_boundary(chip_boundary_region)
 
 # Density derivations
 logger.info('Starting density IHP-SG13CMOS5L derivations.')
@@ -347,14 +395,23 @@ if act_dens_ratio > afil_g1_val
 end
 
 # ActFil window Variables
-afil_g_w = drc_rules['AFil_g_w'].to_f
-act_size = afil_g_w.um
+# Dynamic tile size: use minimum of nominal tile size and chip dimension.
+# This ensures windowed density checks work on small chips without false positives.
+afil_g_w_nominal = drc_rules['AFil_g_w'].to_f
+chip_min_dim = [chip_width, chip_height].min
+afil_g_w_effective = [afil_g_w_nominal, chip_min_dim].min
+act_size = afil_g_w_effective.um
 act_step = 0.5 * act_size
-act_org_x = chip_bbox.left + act_step / 2
-act_org_y = chip_bbox.bottom + act_step / 2
+act_org_x = chip_boundary_bbox.left + act_step / 2
+act_org_y = chip_boundary_bbox.bottom + act_step / 2
 act_tile_size = tile_size(act_size)
 act_tile_step = tile_step(act_step)
 act_tile_origin = tile_origin(act_org_x, act_org_y)
+
+if afil_g_w_effective < afil_g_w_nominal
+  logger.info("AFil windowed density: chip (#{chip_width.round(1)} x #{chip_height.round(1)} um) < nominal tile (#{afil_g_w_nominal} um)")
+  logger.info("  Using adjusted tile size: #{afil_g_w_effective.round(1)} x #{afil_g_w_effective.round(1)} um")
+end
 
 # Rule AFil.g2: Min. Activ coverage ratio for any 800 x 800 um2 chip area [%]= 25.00.
 logger.info('Executing rule AFil.g2')
@@ -365,9 +422,12 @@ afilg2_min = activ.with_density(0.0..afil_g2_val,
                                 tiles_boundary,
                                 act_tile_origin,
                                 padding_ignore)
-afilg2_min.output('AFil.g2',
-                  "5.6. AFil.g2: Min. Activ coverage ratio for any #{afil_g_w} x #{afil_g_w} um2 chip area [%]: #{afil_g2_val * 100}.")
+# Filter markers to chip boundary to avoid false positives from partial edge tiles
+afilg2_min_filtered = afilg2_min.and(chip_boundary_region)
+afilg2_min_filtered.output('AFil.g2',
+                  "5.6. AFil.g2: Min. Activ coverage ratio for any #{afil_g_w_effective.round(1)} x #{afil_g_w_effective.round(1)} um2 chip area [%]: #{afil_g2_val * 100}.")
 afilg2_min.forget
+afilg2_min_filtered.forget
 
 # Rule AFil.g3: Max. Activ coverage ratio for any 800 x 800 um2 chip area [%]= 65.00.
 logger.info('Executing rule AFil.g3')
@@ -378,10 +438,12 @@ afilg3_max = activ.with_density(afil_g3_val..1.0,
                                 tiles_boundary,
                                 act_tile_origin,
                                 padding_ignore)
-
-afilg3_max.output('AFil.g3',
-                  "5.6. AFil.g3: Max. Activ coverage ratio for any any #{afil_g_w} x #{afil_g_w} um2 chip area [%]: #{afil_g3_val * 100}.")
+# Filter markers to chip boundary
+afilg3_max_filtered = afilg3_max.and(chip_boundary_region)
+afilg3_max_filtered.output('AFil.g3',
+                  "5.6. AFil.g3: Max. Activ coverage ratio for any #{afil_g_w_effective.round(1)} x #{afil_g_w_effective.round(1)} um2 chip area [%]: #{afil_g3_val * 100}.")
 afilg3_max.forget
+afilg3_max_filtered.forget
 activ.forget
 
 #==================================================
@@ -469,11 +531,13 @@ end
 #=================================================
 
 # Metals Variables
-mfil_h_w = drc_rules['MFil_h_w'].to_f
-met_size = mfil_h_w.um
+# Dynamic tile size: use minimum of nominal tile size and chip dimension.
+mfil_h_w_nominal = drc_rules['MFil_h_w'].to_f
+mfil_h_w_effective = [mfil_h_w_nominal, chip_min_dim].min
+met_size = mfil_h_w_effective.um
 met_step = 0.5 * met_size
-met_org_x = chip_bbox.left + met_step / 2
-met_org_y = chip_bbox.bottom + met_step / 2
+met_org_x = chip_boundary_bbox.left + met_step / 2
+met_org_y = chip_boundary_bbox.bottom + met_step / 2
 met_tile_size = tile_size(met_size)
 met_tile_step = tile_step(met_step)
 met_tile_origin = tile_origin(met_org_x, met_org_y)
@@ -483,6 +547,11 @@ metal_start_index = 1
 # Metal5 removed - MFil rules only apply to thin metals M1-M4
 mfil_h_val = drc_rules['MFil_h'].to_f
 mfil_k_val = drc_rules['MFil_k'].to_f
+
+if mfil_h_w_effective < mfil_h_w_nominal
+  logger.info("MFil windowed density: chip (#{chip_width.round(1)} x #{chip_height.round(1)} um) < nominal tile (#{mfil_h_w_nominal} um)")
+  logger.info("  Using adjusted tile size: #{mfil_h_w_effective.round(1)} x #{mfil_h_w_effective.round(1)} um")
+end
 
 mets_lay.each_with_index do |met_lay, index|
   metalfiller_no = index + metal_start_index
@@ -495,10 +564,13 @@ mets_lay.each_with_index do |met_lay, index|
                                    tiles_boundary,
                                    met_tile_origin,
                                    padding_ignore)
-  mfilh_min.output("M#{metalfiller_no}Fil.h",
+  # Filter markers to chip boundary to avoid false positives from partial edge tiles
+  mfilh_min_filtered = mfilh_min.and(chip_boundary_region)
+  mfilh_min_filtered.output("M#{metalfiller_no}Fil.h",
                    "5.6. M#{metalfiller_no}Fil.h: Min. Metal#{metalfiller_no} and Metal#{metalfiller_no}:filler \
-                   coverage ratio for any #{mfil_h_w} x #{mfil_h_w} um2 chip area [%]: #{mfil_h_val * 100}")
+                   coverage ratio for any #{mfil_h_w_effective.round(1)} x #{mfil_h_w_effective.round(1)} um2 chip area [%]: #{mfil_h_val * 100}")
   mfilh_min.forget
+  mfilh_min_filtered.forget
 
   # Rule MFil.k: Max. Metal(n) and Metal(n):filler coverage ratio for any 800 x 800 um2 chip area [%]= 75.0.
   logger.info("Executing rule M#{metalfiller_no}Fil.k")
@@ -508,9 +580,12 @@ mets_lay.each_with_index do |met_lay, index|
                                    tiles_boundary,
                                    met_tile_origin,
                                    padding_ignore)
-  mfilk_max.output("M#{metalfiller_no}Fil.k",
-                   "5.6. M#{metalfiller_no}Fil.k: Max. Activ coverage ratio for any #{mfil_h_w} x #{mfil_h_w} um2 chip area [%]: #{mfil_k_val * 100}.")
+  # Filter markers to chip boundary
+  mfilk_max_filtered = mfilk_max.and(chip_boundary_region)
+  mfilk_max_filtered.output("M#{metalfiller_no}Fil.k",
+                   "5.6. M#{metalfiller_no}Fil.k: Max. Metal#{metalfiller_no}:filler coverage ratio for any #{mfil_h_w_effective.round(1)} x #{mfil_h_w_effective.round(1)} um2 chip area [%]: #{mfil_k_val * 100}.")
   mfilk_max.forget
+  mfilk_max_filtered.forget
 end
 metal1.forget
 metal2.forget
