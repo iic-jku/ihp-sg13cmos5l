@@ -30,53 +30,53 @@
 layout = pya.Layout()
 
 # Basic MOSFET devices
-pcellNmos = layout.create_cell("nmos", "SG13_dev", { "l": 0.350e-6, "w": 6e-6, "ng": 3 })
-pcellPmos = layout.create_cell("pmos", "SG13_dev", { "l": 0.350e-6, "w": 6e-6, "ng": 3 })
+pcellNmos = layout.create_cell("nmos", "SG13CMOS5L_dev", { "l": 0.350e-6, "w": 6e-6, "ng": 3 })
+pcellPmos = layout.create_cell("pmos", "SG13CMOS5L_dev", { "l": 0.350e-6, "w": 6e-6, "ng": 3 })
 
 # Resistors (CMOS-compatible, M1-only)
-pcellRsil = layout.create_cell("rsil", "SG13_dev", {})
-pcellRhigh = layout.create_cell("rhigh", "SG13_dev", {})
-pcellRppd = layout.create_cell("rppd", "SG13_dev", {})
+pcellRsil = layout.create_cell("rsil", "SG13CMOS5L_dev", {})
+pcellRhigh = layout.create_cell("rhigh", "SG13CMOS5L_dev", {})
+pcellRppd = layout.create_cell("rppd", "SG13CMOS5L_dev", {})
 
 # Varicap (CMOS-compatible)
-pcellSVaricap = layout.create_cell("SVaricap", "SG13_dev", {})
+pcellSVaricap = layout.create_cell("SVaricap", "SG13CMOS5L_dev", {})
 
 # Via stack (M1-M4-TM1 only)
-pcellViaStack = layout.create_cell("via_stack", "SG13_dev", {})
+pcellViaStack = layout.create_cell("via_stack", "SG13CMOS5L_dev", {})
 
 # Substrate taps
-pcellPtap1 = layout.create_cell("ptap1", "SG13_dev", {})
-pcellNtap1 = layout.create_cell("ntap1", "SG13_dev", {})
+pcellPtap1 = layout.create_cell("ptap1", "SG13CMOS5L_dev", {})
+pcellNtap1 = layout.create_cell("ntap1", "SG13CMOS5L_dev", {})
 
 # Bondpad (TopMetal1 top)
-pcellBondpad = layout.create_cell("bondpad", "SG13_dev", {})
+pcellBondpad = layout.create_cell("bondpad", "SG13CMOS5L_dev", {})
 
 # Phase 8: Additional CMOS-compatible devices
 # HV MOSFETs
-pcellNmosHV = layout.create_cell("nmosHV", "SG13_dev", {})
-pcellPmosHV = layout.create_cell("pmosHV", "SG13_dev", {})
+pcellNmosHV = layout.create_cell("nmosHV", "SG13CMOS5L_dev", {})
+pcellPmosHV = layout.create_cell("pmosHV", "SG13CMOS5L_dev", {})
 
 # Antenna diodes
-pcellDantenna = layout.create_cell("dantenna", "SG13_dev", {})
-pcellDpantenna = layout.create_cell("dpantenna", "SG13_dev", {})
+pcellDantenna = layout.create_cell("dantenna", "SG13CMOS5L_dev", {})
+pcellDpantenna = layout.create_cell("dpantenna", "SG13CMOS5L_dev", {})
 
 # ESD protection
-pcellEsd = layout.create_cell("esd", "SG13_dev", {})
+pcellEsd = layout.create_cell("esd", "SG13CMOS5L_dev", {})
 
 # RF MOSFETs
-pcellRfnmos = layout.create_cell("rfnmos", "SG13_dev", {})
-pcellRfnmosHV = layout.create_cell("rfnmosHV", "SG13_dev", {})
-pcellRfpmos = layout.create_cell("rfpmos", "SG13_dev", {})
-pcellRfpmosHV = layout.create_cell("rfpmosHV", "SG13_dev", {})
+pcellRfnmos = layout.create_cell("rfnmos", "SG13CMOS5L_dev", {})
+pcellRfnmosHV = layout.create_cell("rfnmosHV", "SG13CMOS5L_dev", {})
+pcellRfpmos = layout.create_cell("rfpmos", "SG13CMOS5L_dev", {})
+pcellRfpmosHV = layout.create_cell("rfpmosHV", "SG13CMOS5L_dev", {})
 
 # No Filler Stack utility
-pcellNoFillerStack = layout.create_cell("NoFillerStack", "SG13_dev", {})
+pcellNoFillerStack = layout.create_cell("NoFillerStack", "SG13CMOS5L_dev", {})
 
 # Parasitic PNP (tbd.3)
-pcellPnpMPA = layout.create_cell("pnpMPA", "SG13_dev", {})
+pcellPnpMPA = layout.create_cell("pnpMPA", "SG13CMOS5L_dev", {})
 
 # Sealring (M1-M4-TM1 only)
-pcellSealring = layout.create_cell("sealring", "SG13_dev", {})
+pcellSealring = layout.create_cell("sealring", "SG13CMOS5L_dev", {})
 
 # Create top cell and place instances
 top = layout.create_cell("TOP")

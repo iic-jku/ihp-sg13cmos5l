@@ -87,7 +87,7 @@ class SG13_Tech(TechImpl):
                 self._dataBaseUnits = pya.Technology.technology_by_name(name).dbu
 
     def name(self):
-        return "SG13_dev"
+        return "SG13CMOS5L_dev"
 
     def getGridResolution(self):
         return 0.0

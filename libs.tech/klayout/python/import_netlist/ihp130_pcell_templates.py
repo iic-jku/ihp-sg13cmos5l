@@ -24,7 +24,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_lv_nmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?!.*rfmode).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "nmos",
         "params": [
             {
@@ -50,7 +50,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_lv_pmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?!.*rfmode).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "pmos",
         "params": [
             {
@@ -76,7 +76,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_hv_nmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?!.*rfmode).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "nmosHV",
         "params": [
             {
@@ -102,7 +102,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_hv_pmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?!.*rfmode).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "pmosHV",
         "params": [
             {
@@ -128,7 +128,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_lv_nmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?=.*rfmode=(?P<rfmode>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "rfnmos",
         "params": [
             {
@@ -164,7 +164,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_lv_pmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?=.*rfmode=(?P<rfmode>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "rfpmos",
         "params": [
             {
@@ -200,7 +200,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_hv_nmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?=.*rfmode=(?P<rfmode>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "rfnmosHV",
         "params": [
             {
@@ -236,7 +236,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_hv_pmos(?=.*w=(?P<w>\d+(\.\d+)?u))(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*ng=(?P<ng>\d+))(?=.*m=(?P<m>\d+))(?=.*rfmode=(?P<rfmode>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "rfpmosHV",
         "params": [
             {
@@ -270,7 +270,7 @@ templates = [
     },
     {
         "regex": re.compile(r"^.*bondpad(?=.*size=(?P<size>\d+(\.\d+)?u)).*$"),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "bondpad",
         "params": [
             {
@@ -284,7 +284,7 @@ templates = [
         "regex": re.compile(
             r"^.*dantenna(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*w=(?P<w>\d+(\.\d+)?u)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "dantenna",
         "params": [
             {
@@ -302,7 +302,7 @@ templates = [
         "regex": re.compile(
             r"^.*dpantenna(?=.*l=(?P<l>\d+(\.\d+)?u))(?=.*w=(?P<w>\d+(\.\d+)?u)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "dpantenna",
         "params": [
             {
@@ -320,7 +320,7 @@ templates = [
         "regex": re.compile(
             r"^.*ntap1(?=.*R=(?P<R>\d+(\.\d+)?))(?=.*w=(?P<w>\d+(\.\d+)?e-?\d+))(?=.*l=(?P<l>\d+(\.\d+)?e-?\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "ntap1",
         "params": [
             {
@@ -342,7 +342,7 @@ templates = [
         "regex": re.compile(
             r"^.*ptap1(?=.*R=(?P<R>\d+(\.\d+)?))(?=.*w=(?P<w>\d+(\.\d+)?e-?\d+))(?=.*l=(?P<l>\d+(\.\d+)?e-?\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "ptap1",
         "params": [
             {
@@ -364,7 +364,7 @@ templates = [
         "regex": re.compile(
             r"^.*rhigh(?=.*w=(?P<w>\d+(\.\d+)?e-?\d+))(?=.*l=(?P<l>\d+(\.\d+)?e-?\d+))(?=.*m=(?P<m>\d+))(?=.*b=(?P<b>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "rhigh",
         "params": [
             {
@@ -390,7 +390,7 @@ templates = [
         "regex": re.compile(
             r"^.*rppd(?=.*w=(?P<w>\d+(\.\d+)?e-?\d+))(?=.*l=(?P<l>\d+(\.\d+)?e-?\d+))(?=.*m=(?P<m>\d+))(?=.*b=(?P<b>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "rppd",
         "params": [
             {
@@ -416,7 +416,7 @@ templates = [
         "regex": re.compile(
             r"^.*rsil(?=.*w=(?P<w>\d+(\.\d+)?e-?\d+))(?=.*l=(?P<l>\d+(\.\d+)?e-?\d+))(?=.*m=(?P<m>\d+))(?=.*b=(?P<b>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "rsil",
         "params": [
             {
@@ -442,7 +442,7 @@ templates = [
         "regex": re.compile(
             r"^.*sg13_hv_svaricap(?=.*W=(?P<W>\d+(\.\d+)?e-?\d+))(?=.*L=(?P<L>\d+(\.\d+)?e-?\d+))(?=.*Nx=(?P<Nx>\d+)).*$"
         ),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "SVaricap",
         "params": [
             {
@@ -463,7 +463,7 @@ templates = [
     ###################################################################
     {
         "regex": re.compile(r"^.*diodevdd_2kv(?=.*m=(?P<m>\d+)).*$"),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "esd",
         "params": [
             {
@@ -475,7 +475,7 @@ templates = [
     },
     {
         "regex": re.compile(r"^.*diodevdd_4kv(?=.*m=(?P<m>\d+)).*$"),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "esd",
         "params": [
             {
@@ -487,7 +487,7 @@ templates = [
     },
     {
         "regex": re.compile(r"^.*diodevss_2kv(?=.*m=(?P<m>\d+)).*$"),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "esd",
         "params": [
             {
@@ -499,7 +499,7 @@ templates = [
     },
     {
         "regex": re.compile(r"^.*diodevss_4kv(?=.*m=(?P<m>\d+)).*$"),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "esd",
         "params": [
             {
@@ -511,7 +511,7 @@ templates = [
     },
     {
         "regex": re.compile(r"^.*nmoscl_2(?=.*m=(?P<m>\d+)).*$"),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "esd",
         "params": [
             {
@@ -523,7 +523,7 @@ templates = [
     },
     {
         "regex": re.compile(r"^.*nmoscl_4(?=.*m=(?P<m>\d+)).*$"),
-        "pcell_library": "SG13_dev",
+        "pcell_library": "SG13CMOS5L_dev",
         "pcell_name": "esd",
         "params": [
             {

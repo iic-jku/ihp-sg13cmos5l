@@ -11,7 +11,7 @@ import sys
 import pya
 import klayout.db
 
-LIB = 'SG13_dev'
+LIB = 'SG13CMOS5L_dev'
 PCELL = 'bondpad'
 
 def generate_bondpad(diameter: float, shape: str, output: str):

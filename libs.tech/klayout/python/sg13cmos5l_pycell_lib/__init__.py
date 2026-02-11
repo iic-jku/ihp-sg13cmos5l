@@ -23,7 +23,7 @@ import sys
 from cni.tech import Tech
 from cni.dlo import PCellWrapper
 
-# Creates the SG13_dev technology
+# Creates the SG13CMOS5L_dev technology
 from .sg13_tech import *
 
 from pypreprocessor.pypreprocessor import preprocessor as preProcessor
@@ -155,7 +155,7 @@ class PyCellLib(pya.Library):
     def __init__(self):
         self.description = "IHP SG13CMOS5L Pcells"
 
-        tech = Tech.get('SG13_dev')
+        tech = Tech.get('SG13CMOS5L_dev')
 
         processNames = []
 
@@ -244,7 +244,7 @@ class PyCellLib(pya.Library):
         if os.getenv('IHP_PYCELL_LIB_PRINT_DEFINES_SET') is not None:
             print(f"Current defines set: {definesSetToPrint}")
 
-        self.register("SG13_dev")
+        self.register("SG13CMOS5L_dev")
 
 # instantiate and register the library
 PyCellLib()

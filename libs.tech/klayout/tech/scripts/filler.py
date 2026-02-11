@@ -29,7 +29,7 @@ import os
 import sys
 import pya
 
-LIB = 'SG13_dev'
+LIB = 'SG13CMOS5L_dev'
 
 try:
     output_file

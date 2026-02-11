@@ -12,7 +12,7 @@ import re
 import pya
 import klayout.db
 
-LIB = 'SG13_dev'
+LIB = 'SG13CMOS5L_dev'
 PCELL = 'sealring'
 
 def generate_sealring(width: float, heigth: float, output: str, offset_x: float, offset_y: float):
@@ -37,13 +37,13 @@ def generate_sealring(width: float, heigth: float, output: str, offset_x: float,
     lib = pya.Library.library_by_name(LIB)
     if lib is None:
         raise RuntimeError(
-            "Could not find the 'SG13_dev' PCell library in the current KLayout environment.\n"
+            "Could not find the 'SG13CMOS5L_dev' PCell library in the current KLayout environment.\n"
             "Please make sure the SG13CMOS5L PDK is properly installed and configured in KLayout.\n"
             "This may involve:\n"
             "- Cloning the IHP-Open-PDK repository with all submodules (use --recursive)\n"
             "- Ensuring the SG13CMOS5L technology is registered in KLayout (e.g. using -n sg13cmos5l)\n"
             "- Running KLayout with a version that supports Python PCells and properly loads them\n"
-            "- Verifying that 'SG13_dev' appears in the Library Browser under PCells"
+            "- Verifying that 'SG13CMOS5L_dev' appears in the Library Browser under PCells"
         )
     
     pcell_decl = lib.layout().pcell_declaration(PCELL)
