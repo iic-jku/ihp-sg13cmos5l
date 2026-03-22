@@ -50,14 +50,14 @@ proc sg13cmos5l::diode_convert {parameters} {
 	    peri {
 		# Length, width, and perimeter are converted to units of microns
 		set value [magic::spice2float $value]
-		# set value [expr $value * 1e6]
+		set value [expr $value * 1e6]
 		set value [magic::3digitpastdecimal $value]
 		dict set pdkparams [string tolower $key] $value
 	    }
 	    area {
 		# area also converted to units of microns
 		set value [magic::spice2float $value]
-		# set value [expr $value * 1e12]
+		set value [expr $value * 1e12]
 		set value [magic::3digitpastdecimal $value]
 		dict set pdkparams [string tolower $key] $value
 	    }
