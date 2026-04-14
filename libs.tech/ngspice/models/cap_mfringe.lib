@@ -27,6 +27,21 @@
 *           = 0.55 fF/um^2 otherwise
 *   C = areacap * w * l
 *
+* Origin of the areacap values:
+*   Empirical fit derived by R. Timothy Edwards (Magic PR #31,
+*   libs.tech/magic/ihp-sg13cmos5l-cap.tcl, lines 20-29). Interdigitated
+*   layouts were generated for each metal-stack combination and extracted
+*   with Magic's parasitic extractor ('extract do local' / 'extract all'),
+*   which uses the per-layer coupling and fringing capacitance models from
+*   the Magic tech file. A linear fit against bottom-metal identity and
+*   stack height produced the two-constant expression above.
+*
+*   There is no foundry-provided compact model for this device -- it is an
+*   approximation intended for early-stage design. Accuracy degrades for
+*   small devices (edge effects dominate) and non-minimum finger pitch.
+*   For production designs, extract the actual layout with a parasitic
+*   extractor that models the CMOS5L interconnect stack.
+*
 * Parameters:
 *   w    - capacitor width  [m] (default 2.0 um)
 *   l    - capacitor length [m] (default 2.0 um)
