@@ -38,19 +38,24 @@ class cap_mfringe(DloGen):
     METAL_NAMES = {1: 'Metal1', 2: 'Metal2', 3: 'Metal3', 4: 'Metal4'}
     VIA_NAMES   = {1: 'Via1',   2: 'Via2',   3: 'Via3'}
 
-    # Design rules per metal layer (from DRM / Magic tech file)
-    # M1 has tighter pitch; M2-M4 share the same rules.
+    # Design rules per metal layer (from SG13CMOS5L DRM)
+    # M1.a = 0.16, M1.b = 0.18; Mn.a = 0.20, Mn.b = 0.21
     METAL_RULES = {
-        1: {'mw': 0.13, 'ms': 0.18, 'widem': 0.30, 'extras': 0.04},
-        2: {'mw': 0.15, 'ms': 0.21, 'widem': 0.39, 'extras': 0.03},
-        3: {'mw': 0.15, 'ms': 0.21, 'widem': 0.39, 'extras': 0.03},
-        4: {'mw': 0.15, 'ms': 0.21, 'widem': 0.39, 'extras': 0.03},
+        1: {'mw': 0.16, 'ms': 0.18, 'widem': 0.30, 'extras': 0.04},
+        2: {'mw': 0.20, 'ms': 0.21, 'widem': 0.39, 'extras': 0.03},
+        3: {'mw': 0.20, 'ms': 0.21, 'widem': 0.39, 'extras': 0.03},
+        4: {'mw': 0.20, 'ms': 0.21, 'widem': 0.39, 'extras': 0.03},
     }
 
-    # Via sizes (width) -- Via1 is 0.19, Via2/Via3 are 0.20
-    # For edge calculations the Magic generator uses via3 (0.20) uniformly.
-    VIA_WIDTH = 0.20        # representative via width for edge sizing
-    VIA1_BOT_ENC = 0.005    # M1 bottom enclosure of Via1
+    # Via rules (from SG13CMOS5L DRM)
+    # V1.a = Vn.a = 0.19 (min AND max -- square vias only)
+    # V1.b = Vn.b = 0.22 (min spacing)
+    # V1.c = 0.01 (Metal1 enclosure of Via1)
+    # Mn.c = 0.005 (Metal(n) enclosure of Via(n-1))
+    VIA_CUT = 0.19          # via cut size (square)
+    VIA_SPACING = 0.22      # via minimum edge-to-edge spacing
+    VIA_WIDTH = 0.20        # metal-enclosed via width for edge sizing (VIA_CUT + 2*Mn.c)
+    VIA1_BOT_ENC = 0.005    # extra M1 enclosure beyond standard (V1.c - Mn.c)
 
     @classmethod
     def defineParamSpecs(cls, specs):
@@ -88,6 +93,32 @@ class cap_mfringe(DloGen):
         # Enforce mmax >= mmin
         if self.mmax < self.mmin:
             self.mmax = self.mmin
+
+    def _paint_via_array(self, via_layer, llx, lly, urx, ury):
+        """Paint an array of square vias within the given bounding box.
+
+        Vias are VIA_CUT x VIA_CUT squares at VIA_SPACING edge-to-edge.
+        The array is centered within the region.
+        """
+        via_cut = self.VIA_CUT
+        via_pitch = via_cut + self.VIA_SPACING
+        region_w = urx - llx
+        region_h = ury - lly
+        if region_w < via_cut or region_h < via_cut:
+            return
+        nx = max(1, int((region_w - via_cut) / via_pitch) + 1)
+        ny = max(1, int((region_h - via_cut) / via_pitch) + 1)
+        array_w = (nx - 1) * via_pitch + via_cut
+        array_h = (ny - 1) * via_pitch + via_cut
+        x0 = llx + (region_w - array_w) / 2.0
+        y0 = lly + (region_h - array_h) / 2.0
+        for i in range(nx):
+            for j in range(ny):
+                vx = GridFix(x0 + i * via_pitch)
+                vy = GridFix(y0 + j * via_pitch)
+                dbCreateRect(self, via_layer,
+                             Box(vx, vy, GridFix(vx + via_cut),
+                                 GridFix(vy + via_cut)))
 
     def genLayout(self):
         w = self.w_um
@@ -181,16 +212,16 @@ class cap_mfringe(DloGen):
                 maxet = max(edget, last_edge['t'])
                 via_lyr = via_layers[m - 1]
 
-                # Bottom via stripe
+                # Bottom via region
                 vb_llx = GridFix(maxel + pitch)
                 vb_urx = GridFix(w - (maxer + pitch))
                 vb_lly = GridFix(viabe1)
                 vb_ury = GridFix(vb_lly + viaw1)
                 if vb_urx > vb_llx:
-                    dbCreateRect(self, via_lyr,
-                                 Box(vb_llx, vb_lly, vb_urx, vb_ury))
+                    self._paint_via_array(via_lyr,
+                                         vb_llx, vb_lly, vb_urx, vb_ury)
 
-                # Left via stripe
+                # Left via region
                 vl_lly = GridFix(maxeb + ms)
                 vl_ury = GridFix(l - (maxet + pitch))
                 vl_llx = GridFix(viabe1 + viate1)
@@ -198,19 +229,19 @@ class cap_mfringe(DloGen):
                 if vl_ury - vl_lly < viaw1:
                     vl_ury = GridFix(vl_lly + viaw1)
                 if vl_ury > vl_lly:
-                    dbCreateRect(self, via_lyr,
-                                 Box(vl_llx, vl_lly, vl_urx, vl_ury))
+                    self._paint_via_array(via_lyr,
+                                         vl_llx, vl_lly, vl_urx, vl_ury)
 
-                # Right via stripe
+                # Right via region
                 vr_lly = GridFix(maxeb + pitch)
                 vr_ury = GridFix(l - (maxet + ms))
                 vr_urx = GridFix(w - viabe1)
                 vr_llx = GridFix(vr_urx - viaw1)
                 if vr_ury > vr_lly:
-                    dbCreateRect(self, via_lyr,
-                                 Box(vr_llx, vr_lly, vr_urx, vr_ury))
+                    self._paint_via_array(via_lyr,
+                                         vr_llx, vr_lly, vr_urx, vr_ury)
 
-                # Top via stripe
+                # Top via region
                 vt_ury = GridFix(l - (viabe1 + viate1))
                 vt_lly = GridFix(vt_ury - viaw1)
                 vt_llx = GridFix(maxel + pitch)
@@ -218,8 +249,8 @@ class cap_mfringe(DloGen):
                 if vt_urx - vt_llx < viaw1:
                     vt_urx = GridFix(vt_llx + viaw1)
                 if vt_urx > vt_llx:
-                    dbCreateRect(self, via_lyr,
-                                 Box(vt_llx, vt_lly, vt_urx, vt_ury))
+                    self._paint_via_array(via_lyr,
+                                         vt_llx, vt_lly, vt_urx, vt_ury)
 
             # -- Paint metal fingers --
             met = metal_layers[m]

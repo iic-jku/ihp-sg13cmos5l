@@ -24,30 +24,15 @@
 $logger = logger
 $unit = dbu
 
-# Device class for interdigitated metal fringe capacitor
-class DeviceCapMfringe < RBA::DeviceClassCapacitor
-  def initialize
-    clear_parameters
-    clear_terminals
-    clear_equivalent_terminal_ids
-
-    add_parameter(RBA::DeviceParameterDefinition.new('w', 'width', 0, false))
-    add_parameter(RBA::DeviceParameterDefinition.new('l', 'length', 0, false))
-
-    ter1 = add_terminal(RBA::DeviceTerminalDefinition.new('c1'))
-    ter2 = add_terminal(RBA::DeviceTerminalDefinition.new('c2'))
-    ter1.name = 'c1'
-    ter2.name = 'c2'
-
-    self.supports_serial_combination = false
-    self.supports_parallel_combination = false
-  end
-end
-
-# Extractor for cap_mfringe device.
+# Extractor for cap_mfringe interdigitated metal fringe capacitor.
 # Recognizes the device by the recog_mom (99/39) marker painted by the PCell.
-# Terminals c1 and c2 are identified from the metal pin shapes within the
-# marker: c1 has lower x-center (left side), c2 has higher y-center (top).
+# Uses DeviceCustomMIM (defined in custom_mim_extractor.lvs, loaded via
+# custom_classes.lvs) for compatibility with the SPICE reader which creates
+# DeviceCustomMIM for all non-varicap capacitor models.
+#
+# Terminal identification by position within the marker:
+#   mim_top = port with lower x-center (left side, corresponds to PCell c1)
+#   mim_btm = port with higher y-center (top side, corresponds to PCell c2)
 class CapMfringeExtractor < RBA::GenericDeviceExtractor
   def initialize(name)
     self.name = name
@@ -56,7 +41,7 @@ class CapMfringeExtractor < RBA::GenericDeviceExtractor
 
   def setup
     define_layers
-    @reg_dev = DeviceCapMfringe.new
+    @reg_dev = DeviceCustomMIM.new(@name)
     register_device_class(@reg_dev)
   end
 
@@ -92,21 +77,22 @@ class CapMfringeExtractor < RBA::GenericDeviceExtractor
       device.set_parameter('l', bbox.height * $unit)
 
       # Assign terminals by position:
-      # c1 = port with lower x-center (left side of device)
-      # c2 = port with higher y-center (top side of device)
+      # mim_top = port with lower x-center (left side of device)
+      # mim_btm = port with higher y-center (top side of device)
       sorted = port_polygons.sort_by { |p| p.bbox.center.x }
-      c1_poly = sorted[0]
-      c2_poly = sorted[-1]
+      top_poly = sorted[0]
+      btm_poly = sorted[-1]
 
       # If both have similar x, use y to disambiguate
-      if (c1_poly.bbox.center.x - c2_poly.bbox.center.x).abs < 100
+      if (top_poly.bbox.center.x - btm_poly.bbox.center.x).abs < 100
         sorted = port_polygons.sort_by { |p| p.bbox.center.y }
-        c1_poly = sorted[0]
-        c2_poly = sorted[-1]
+        top_poly = sorted[0]
+        btm_poly = sorted[-1]
       end
 
-      define_terminal(device, @reg_dev.terminal_id('c1'), 0, c1_poly)
-      define_terminal(device, @reg_dev.terminal_id('c2'), 1, c2_poly)
+      # Both terminals on layer 1 (ports) which has metal connectivity
+      define_terminal(device, @reg_dev.terminal_id('mim_top'), 1, top_poly)
+      define_terminal(device, @reg_dev.terminal_id('mim_btm'), 1, btm_poly)
     end
   end
 
