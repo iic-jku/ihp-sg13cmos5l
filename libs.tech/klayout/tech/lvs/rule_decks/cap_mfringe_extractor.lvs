@@ -1,0 +1,120 @@
+# frozen_string_literal: true
+
+#==========================================================================
+# Copyright 2026 IHP PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
+#==========================================================================
+
+#================================================
+# ---------- CAP_MFRINGE CUSTOM DEVICE ----------
+#================================================
+
+$logger = logger
+$unit = dbu
+
+# Device class for interdigitated metal fringe capacitor
+class DeviceCapMfringe < RBA::DeviceClassCapacitor
+  def initialize
+    clear_parameters
+    clear_terminals
+    clear_equivalent_terminal_ids
+
+    add_parameter(RBA::DeviceParameterDefinition.new('w', 'width', 0, false))
+    add_parameter(RBA::DeviceParameterDefinition.new('l', 'length', 0, false))
+
+    ter1 = add_terminal(RBA::DeviceTerminalDefinition.new('c1'))
+    ter2 = add_terminal(RBA::DeviceTerminalDefinition.new('c2'))
+    ter1.name = 'c1'
+    ter2.name = 'c2'
+
+    self.supports_serial_combination = false
+    self.supports_parallel_combination = false
+  end
+end
+
+# Extractor for cap_mfringe device.
+# Recognizes the device by the recog_mom (99/39) marker painted by the PCell.
+# Terminals c1 and c2 are identified from the metal pin shapes within the
+# marker: c1 has lower x-center (left side), c2 has higher y-center (top).
+class CapMfringeExtractor < RBA::GenericDeviceExtractor
+  def initialize(name)
+    self.name = name
+    @name = name
+  end
+
+  def setup
+    define_layers
+    @reg_dev = DeviceCapMfringe.new
+    register_device_class(@reg_dev)
+  end
+
+  def get_connectivity(_layout, layers)
+    core   = layers[0]  # recog_mom marker
+    ports  = layers[1]  # metal pin shapes within marker
+    dev_mk = layers[2]  # device marker (same as core)
+
+    conn = RBA::Connectivity.new
+    conn.connect(core, core)
+    conn.connect(core, dev_mk)
+    conn.connect(ports, dev_mk)
+    conn
+  end
+
+  def extract_devices(layer_geometry)
+    core, ports, dev_mk = layer_geometry
+
+    dev_mk.merged.each do |_region|
+      port_polygons = []
+      ports.each { |p| port_polygons << p }
+
+      if port_polygons.size < 2
+        $logger.info("cap_mfringe: expected 2 port regions, found #{port_polygons.size}")
+        next
+      end
+
+      device = create_device
+
+      # Measure W and L from the marker bounding box
+      bbox = core.merged.bbox
+      device.set_parameter('w', bbox.width * $unit)
+      device.set_parameter('l', bbox.height * $unit)
+
+      # Assign terminals by position:
+      # c1 = port with lower x-center (left side of device)
+      # c2 = port with higher y-center (top side of device)
+      sorted = port_polygons.sort_by { |p| p.bbox.center.x }
+      c1_poly = sorted[0]
+      c2_poly = sorted[-1]
+
+      # If both have similar x, use y to disambiguate
+      if (c1_poly.bbox.center.x - c2_poly.bbox.center.x).abs < 100
+        sorted = port_polygons.sort_by { |p| p.bbox.center.y }
+        c1_poly = sorted[0]
+        c2_poly = sorted[-1]
+      end
+
+      define_terminal(device, @reg_dev.terminal_id('c1'), 0, c1_poly)
+      define_terminal(device, @reg_dev.terminal_id('c2'), 1, c2_poly)
+    end
+  end
+
+  private
+
+  def define_layers
+    define_layer('core', 'cap_mfringe recognition marker (Recog.mom)')
+    define_layer('ports', 'Terminal connection ports (metal pins)')
+    define_layer('dev_mk', 'Device marker')
+  end
+end

@@ -46,6 +46,7 @@ moduleNames = [
         'pmos_code',
         # Additional devices for SG13CMOS5L PDK
         'SVaricap_code',   # Symlink - no modification needed
+        'cap_mfringe_code',  # Metal fringe interdigitated capacitor
         'rsil_code',       # Symlink - silicided resistor
         'rppd_code',       # Symlink - p+ poly resistor
         'rhigh_code',      # Symlink - high-R poly resistor

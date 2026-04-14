@@ -1,0 +1,54 @@
+*******************************************************************************
+*                                                                             *
+* Copyright 2026 IHP PDK Authors                                              *
+*                                                                             *
+* Licensed under the Apache License, Version 2.0 (the "License");             *
+* you may not use this file except in compliance with the License.            *
+* You may obtain a copy of the License at                                     *
+*                                                                             *
+*     https://www.apache.org/licenses/LICENSE-2.0                             *
+*                                                                             *
+* Unless required by applicable law or agreed to in writing, software         *
+* distributed under the License is distributed on an "AS IS" BASIS,           *
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.    *
+* See the License for the specific language governing permissions and         *
+* limitations under the License.                                              *
+*                                                                             *
+*******************************************************************************
+*******************************************************************************
+* Interdigitated metal fringe capacitor (cap_mfringe)
+*
+* Metal stack M1..M4, alternating-finger topology.
+* Areacap model: base capacitance density depends on bottom metal,
+* each additional metal layer adds 0.55 fF/um^2.
+*
+*   areacap = base + (mmax - mmin) * 0.55  [fF/um^2]
+*     base  = 0.67 fF/um^2 if mmin == 1 (Metal1)
+*           = 0.55 fF/um^2 otherwise
+*   C = areacap * w * l
+*
+* Parameters:
+*   w    - capacitor width  [m] (default 2.0 um)
+*   l    - capacitor length [m] (default 2.0 um)
+*   mmin - bottom metal layer index, 1=M1 .. 4=M4 (default 1)
+*   mmax - top metal layer index, 1=M1 .. 4=M4    (default 4)
+*
+* Terminals:
+*   c1 - plate 1
+*   c2 - plate 2
+*
+*******************************************************************************
+*
+*                c1
+*                |  c2
+*                |  |
+.subckt cap_mfringe c1 c2
+.param w=2.0e-6 l=2.0e-6 mmin=1 mmax=4
+
+* Areacap [fF/um^2]: 0.67 base for M1, 0.55 otherwise, +0.55 per extra layer
+* Capacitance [F]: areacap * w_um * l_um * 1e-15
++ cval='((mmin==1 ? 0.67 : 0.55) + (mmax - mmin) * 0.55) * (w * 1e6) * (l * 1e6) * 1e-15'
+
+C1 c1 c2 'cval'
+
+.ends cap_mfringe
