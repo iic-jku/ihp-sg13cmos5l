@@ -430,6 +430,11 @@ append XSCHEM_LIBRARY_PATH :${PDK_ROOT}/${PDK}/libs.tech/xschem/sg13cmos5l_pr
 append XSCHEM_LIBRARY_PATH :${PDK_ROOT}/${PDK}/libs.ref/sg13cmos5l_stdcell_hv/sym/xschem
 set ::SG13G2_HV_SCH ${PDK_ROOT}/${PDK}/libs.ref/sg13cmos5l_stdcell_hv/sch/xschem
 # append XSCHEM_LIBRARY_PATH :${PDK_ROOT}/${PDK}/libs.tech/xschem/sg13cmos5l_stdcells
+
+# cap_cmomi: model-exact C() helper used by the device symbol label
+if { [file exists ${PDK_ROOT}/${PDK}/libs.tech/xschem/sg13cmos5l_pr/cap_cmomi.tcl] } {
+    source ${PDK_ROOT}/${PDK}/libs.tech/xschem/sg13cmos5l_pr/cap_cmomi.tcl
+}
 # append XSCHEM_LIBRARY_PATH :${PDK_ROOT}/${PDK}/libs.ref/sg13cmos5l_stdcell/sym/xschem
 
 # allow a user-specific path add-on (https://github.com/iic-jku/iic-osic-tools/issues/7)
